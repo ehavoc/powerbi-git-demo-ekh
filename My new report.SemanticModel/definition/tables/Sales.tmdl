@@ -1,26 +1,31 @@
+/// Sales fact table. One row per order line with quantity, unit price, line-level sales amount, and cost. Hosts the core sales, profit, and time-intelligence measures used across the report.
 table Sales
 	lineageTag: d011e21c-3913-493a-b6fd-5022a2c14e7d
 	sourceLineageTag: c90c54c3-ecc7-4006-acae-213e629b2b9e
 
-	measure Profit = SUM(Sales[Sales]) - SUM(Sales[Cost])
+	/// Gross profit = Sales Amount minus Cost. DAX: subtracts the total of Sales[Cost] from the total of Sales[Sales Amount] in the current filter context (selected dates, regions, products, etc.).
+	measure Profit = SUM(Sales[Sales Amount]) - SUM(Sales[Cost])
 		formatString: \$#,0;(\$#,0);\$#,0
 		lineageTag: f5b89451-737b-47aa-808c-45d229f927cc
 		sourceLineageTag: e9392e16-8287-4a63-8f98-14ddbc88ec6d
 		dataCategory: Uncategorized
 
-	measure 'Profit Margin' = DIVIDE([Profit], SUM(Sales[Sales]))
+	/// Profit as a percentage of sales. DAX: DIVIDE([Profit], SUM(Sales[Sales Amount])). DIVIDE is used instead of '/' so a zero-sales context returns blank rather than a divide-by-zero error.
+	measure 'Profit Margin' = DIVIDE([Profit], SUM(Sales[Sales Amount]))
 		formatString: #,0.00%;-#,0.00%;#,0.00%
 		lineageTag: 2365c808-8b7d-46b6-b24a-8a13cbba8746
 		sourceLineageTag: 6dcf0ce0-a21f-454e-8857-7bf5e2b7b031
 		dataCategory: Uncategorized
 
-	measure 'Avg Price' = AVERAGE(Sales[Unit Price])
+	/// Mean selling price per unit across the rows in scope. DAX: AVERAGE over Sales[Unit Price] - a simple arithmetic mean of the per-line unit prices, not weighted by quantity.
+	measure 'Average Price' = AVERAGE(Sales[Unit Price])
 		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
 		displayFolder: Pricing
 		lineageTag: 9bcfa08f-1bf3-49d8-b35d-5dad67a2f666
 		sourceLineageTag: 9ca76f2a-b132-4cb0-813c-f4e65d5f9c71
 		dataCategory: Uncategorized
 
+	/// Middle selling price - the value where half of lines are above and half below. DAX: MEDIAN over Sales[Unit Price]. Less skewed by outliers than Average Price.
 	measure 'Median Price' = MEDIAN(Sales[Unit Price])
 		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
 		displayFolder: Pricing
@@ -28,6 +33,7 @@ table Sales
 		sourceLineageTag: 22c94527-a543-4638-8cf7-fb934808620e
 		dataCategory: Uncategorized
 
+	/// Lowest unit price observed in the current filter context. DAX: MIN over Sales[Unit Price].
 	measure 'Min Price' = MIN(Sales[Unit Price])
 		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
 		displayFolder: Pricing
@@ -35,6 +41,7 @@ table Sales
 		sourceLineageTag: 94d285a5-58ae-40fb-98dd-29b64a058507
 		dataCategory: Uncategorized
 
+	/// Highest unit price observed in the current filter context. DAX: MAX over Sales[Unit Price].
 	measure 'Max Price' = MAX(Sales[Unit Price])
 		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
 		displayFolder: Pricing
@@ -42,6 +49,7 @@ table Sales
 		sourceLineageTag: 793f0df1-015b-4908-b5bd-aefbd1dfdb62
 		dataCategory: Uncategorized
 
+	/// Count of distinct sales orders. DAX: DISTINCTCOUNT of Sales[SalesOrderNumber] - because an order can contain multiple line rows, distinct-count collapses them so one order is counted once.
 	measure Orders = DISTINCTCOUNT(Sales[SalesOrderNumber])
 		formatString: 0
 		displayFolder: Counts
@@ -49,6 +57,7 @@ table Sales
 		sourceLineageTag: 57f38fd6-cf9a-4d06-a7ee-1a306043c61b
 		dataCategory: Uncategorized
 
+	/// Total number of order lines (rows in Sales) in the current filter context. DAX: COUNTROWS(Sales). Differs from Orders because a single order can have many lines.
 	measure 'Order Lines' = COUNTROWS(Sales)
 		formatString: 0
 		displayFolder: Counts
@@ -56,21 +65,24 @@ table Sales
 		sourceLineageTag: da03adc1-acfb-4d73-9aaa-b5e373c5e88f
 		dataCategory: Uncategorized
 
-	measure 'Sales % All Region' = DIVIDE(SUM(Sales[Sales]), CALCULATE(SUM(Sales[Sales]), ALL(Region)))
+	/// Share of total sales contributed by the current selection, vs. all regions combined. DAX: DIVIDE(SUM(Sales[Sales Amount]), CALCULATE(SUM(Sales[Sales Amount]), ALL(Region))). The ALL(Region) inside CALCULATE removes any filter on Region for the denominator, so the result is always 'this selection / world total'.
+	measure 'Sales % All Regions' = DIVIDE(SUM(Sales[Sales Amount]), CALCULATE(SUM(Sales[Sales Amount]), ALL(Region)))
 		formatString: 0.00%;-0.00%;0.00%
 		displayFolder: Ratios
 		lineageTag: 8ffba007-60e8-44ea-9c67-d4ab7213dce5
 		sourceLineageTag: 008e9ca5-2758-43de-9595-76282e69f31d
 		dataCategory: Uncategorized
 
-	measure 'Sales % Country' = DIVIDE(SUM(Sales[Sales]), CALCULATE(SUM(Sales[Sales]), ALLEXCEPT(Region, Region[Group], Region[Country])))
+	/// Share of sales within the current country. DAX: ALLEXCEPT(Region, Region[Group], Region[Country]) keeps Group and Country filters in the denominator but removes any Region-level filter, so the result is 'this region / its country total'.
+	measure 'Sales % Country' = DIVIDE(SUM(Sales[Sales Amount]), CALCULATE(SUM(Sales[Sales Amount]), ALLEXCEPT(Region, Region[Group], Region[Country])))
 		formatString: 0.00%;-0.00%;0.00%
 		displayFolder: Ratios
 		lineageTag: f19a72b2-708f-41c6-bb5c-7eb6d1913698
 		sourceLineageTag: 954e603d-5c04-4a90-ad4c-8f34b04ea323
 		dataCategory: Uncategorized
 
-	measure 'Sales % Group' = DIVIDE(SUM(Sales[Sales]), CALCULATE(SUM(Sales[Sales]), ALLEXCEPT(Region, Region[Group])))
+	/// Share of sales within the current regional Group. DAX: ALLEXCEPT(Region, Region[Group]) keeps the Group filter but removes Country/Region filters in the denominator, so the result is 'this region / its group total'.
+	measure 'Sales % Group' = DIVIDE(SUM(Sales[Sales Amount]), CALCULATE(SUM(Sales[Sales Amount]), ALLEXCEPT(Region, Region[Group])))
 		displayFolder: Ratios
 		lineageTag: a0178da3-679c-4e41-8fc7-87132d7b59f0
 		sourceLineageTag: 565a0642-ff70-4055-95e3-f5233d204ae8
@@ -78,29 +90,26 @@ table Sales
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	measure 'Sales YTD' = TOTALYTD(SUM(Sales[Sales]), 'Date'[Date])
+	/// Cumulative sales from the start of the calendar year through the dates in context. DAX: TOTALYTD wraps SUM(Sales[Sales Amount]) and uses 'Date'[Date] as the timeline. Requires the Date table to be marked as a date table and joined to Sales on OrderDate.
+	measure 'Sales YTD' = TOTALYTD(SUM(Sales[Sales Amount]), 'Date'[Date])
 		formatString: \$#,0;(\$#,0);\$#,0
 		displayFolder: Time Intelligence
 		lineageTag: ccc1d7bc-af20-49c7-9e9b-ac44d6c367f0
 		sourceLineageTag: a9440108-f6a0-4e23-b6c9-9fa7662ff79b
 		dataCategory: Uncategorized
 
+	/// Year-over-year growth as a percentage. DAX: stores prior-year sales in a VAR using SAMEPERIODLASTYEAR (shifts the date filter back 12 months), then computes (current - prior) / prior using DIVIDE so the result is blank when there is no prior-year value.
 	measure 'Sales YoY Growth' =
-			VAR SalesPriorYear = CALCULATE(SUM(Sales[Sales]), SAMEPERIODLASTYEAR('Date'[Date]))
-			RETURN DIVIDE(SUM(Sales[Sales]) - SalesPriorYear, SalesPriorYear)
+			VAR SalesPriorYear = CALCULATE(SUM(Sales[Sales Amount]), SAMEPERIODLASTYEAR('Date'[Date]))
+			RETURN DIVIDE(SUM(Sales[Sales Amount]) - SalesPriorYear, SalesPriorYear)
 		formatString: 0.00%;-0.00%;0.00%
 		displayFolder: Time Intelligence
 		lineageTag: 01e5408a-0d93-4ce4-868b-e7ac0af695d2
 		sourceLineageTag: 5e215bb9-dc07-4caa-a171-431cb225e29a
 		dataCategory: Uncategorized
 
-	measure 'Sales per Capita' = ```
-			
-			    DIVIDE(
-			        SUM(Sales[Sales]),
-			        SUM('US Population'[Population])
-			    )
-			```
+	/// Sales normalized by US state population. DAX: DIVIDE(SUM(Sales[Sales Amount]), SUM('US Population'[Population])) - useful for comparing markets of different sizes (e.g. small state vs. large state).
+	measure 'Sales per Capita' = DIVIDE(SUM(Sales[Sales Amount]), SUM('US Population'[Population]))
 		formatString: \$#,0.0000;(\$#,0.0000);\$#,0.0000
 		lineageTag: db973cbe-3ea9-4cf7-8620-fc10c469846a
 
@@ -110,6 +119,7 @@ table Sales
 
 		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
 
+	/// Sales order identifier (e.g. SO-0001). Used by the Orders measure via DISTINCTCOUNT to count unique orders. Hidden.
 	column SalesOrderNumber
 		dataType: string
 		isHidden
@@ -121,6 +131,7 @@ table Sales
 
 		annotation SummarizationSetBy = User
 
+	/// Date the order was placed. Joined to Date[Date] to enable time-intelligence calculations. Hidden.
 	column OrderDate
 		dataType: dateTime
 		isHidden
@@ -133,6 +144,7 @@ table Sales
 
 		annotation SummarizationSetBy = User
 
+	/// Foreign key to Product[ProductKey]. Hidden.
 	column ProductKey
 		dataType: int64
 		isHidden
@@ -145,6 +157,7 @@ table Sales
 
 		annotation SummarizationSetBy = User
 
+	/// Foreign key to Reseller[ResellerKey]. Hidden.
 	column ResellerKey
 		dataType: int64
 		isHidden
@@ -157,6 +170,7 @@ table Sales
 
 		annotation SummarizationSetBy = User
 
+	/// Foreign key to Salesperson[EmployeeKey]. Hidden.
 	column EmployeeKey
 		dataType: int64
 		isHidden
@@ -169,6 +183,7 @@ table Sales
 
 		annotation SummarizationSetBy = User
 
+	/// Foreign key to Region[SalesTerritoryKey]. Hidden.
 	column SalesTerritoryKey
 		dataType: int64
 		isHidden
@@ -181,6 +196,7 @@ table Sales
 
 		annotation SummarizationSetBy = User
 
+	/// Number of units sold on the order line. Aggregates by SUM.
 	column Quantity
 		dataType: int64
 		formatString: #,0
@@ -192,6 +208,7 @@ table Sales
 
 		annotation SummarizationSetBy = User
 
+	/// Selling price per unit. Hidden because it's a per-row attribute; use the Average/Median/Min/Max Price measures for aggregation.
 	column 'Unit Price'
 		dataType: decimal
 		isHidden
@@ -204,7 +221,8 @@ table Sales
 
 		annotation SummarizationSetBy = User
 
-	column Sales
+	/// Line-level sales amount (Quantity x Unit Price). The base column summed by Profit, Sales YTD, and the Sales % measures.
+	column 'Sales Amount'
 		dataType: decimal
 		formatString: \$#,0;(\$#,0);\$#,0
 		lineageTag: a655ad3f-e507-41ee-906b-5bd46e112411
@@ -215,7 +233,7 @@ table Sales
 
 		annotation SummarizationSetBy = User
 
-	/// Based in standard cost
+	/// Line-level cost based on Product[Standard Cost]. Subtracted from Sales Amount in the Profit measure.
 	column Cost
 		dataType: decimal
 		formatString: \$#,0;(\$#,0);\$#,0

@@ -1,8 +1,9 @@
-/// Salesperson related to region(s)
+/// Salesperson dimension used specifically for the role-playing relationship via SalespersonRegion. Same content as Salesperson but joined through the bridge to compare performance across regions a salesperson covers.
 table 'Salesperson (Performance)'
 	lineageTag: 3a1f6d96-7778-460f-8e8d-d7c85f535d98
 	sourceLineageTag: 30cafbe7-1db4-40f7-a023-2211b63f024f
 
+	/// Foreign key to Sales[EmployeeKey] for the performance role-playing relationship via SalespersonRegion. Hidden.
 	column EmployeeKey
 		dataType: int64
 		isHidden
@@ -16,6 +17,7 @@ table 'Salesperson (Performance)'
 
 		annotation SummarizationSetBy = User
 
+	/// Business employee ID. Hidden.
 	column EmployeeID
 		dataType: int64
 		isHidden
@@ -29,6 +31,7 @@ table 'Salesperson (Performance)'
 
 		annotation SummarizationSetBy = User
 
+	/// Job title.
 	column Title
 		dataType: string
 		lineageTag: 67cee150-a30c-498d-b1c2-f14223ad6400
@@ -39,6 +42,7 @@ table 'Salesperson (Performance)'
 
 		annotation SummarizationSetBy = User
 
+	/// User principal name (work email). Hidden.
 	column UPN
 		dataType: string
 		isHidden
@@ -50,6 +54,7 @@ table 'Salesperson (Performance)'
 
 		annotation SummarizationSetBy = User
 
+	/// Salesperson display name shown in visuals when analyzing performance across regions.
 	column Salesperson
 		dataType: string
 		lineageTag: 1689ceb7-830f-4164-b126-15e4fba7e9a2

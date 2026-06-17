@@ -1,7 +1,9 @@
+/// Product dimension. One row per product sold, including category/subcategory classification, standard cost, color, and formatting helper columns used for conditional formatting in visuals.
 table Product
 	lineageTag: b18386f2-e8f8-4fa7-a3c1-2e33f398ea78
 	sourceLineageTag: dd665867-e7a6-4a52-9aad-35c90f0546d2
 
+	/// Surrogate key joining Product to Sales. Hidden from report consumers.
 	column ProductKey
 		dataType: int64
 		isHidden
@@ -15,6 +17,7 @@ table Product
 
 		annotation SummarizationSetBy = User
 
+	/// Product display name shown in visuals (e.g. 'Mountain-100 Silver, 38').
 	column Product
 		dataType: string
 		lineageTag: ced1ac03-7027-4e90-abc0-30c94e91a086
@@ -25,6 +28,7 @@ table Product
 
 		annotation SummarizationSetBy = User
 
+	/// Unit cost used to compute Sales[Cost]. Manufacturer/supplier standard cost.
 	column 'Standard Cost'
 		dataType: decimal
 		formatString: \$#,0;(\$#,0);\$#,0
@@ -36,6 +40,7 @@ table Product
 
 		annotation SummarizationSetBy = User
 
+	/// Product color (Red, Black, Silver, ...). Used for filtering and grouping.
 	column Color
 		dataType: string
 		lineageTag: 315e8a33-c4f1-4eaa-9554-288bb4870abf
@@ -46,6 +51,7 @@ table Product
 
 		annotation SummarizationSetBy = User
 
+	/// Product subcategory (e.g. Road Bikes, Helmets). Mid level of the Products hierarchy.
 	column Subcategory
 		dataType: string
 		lineageTag: 15625f30-14c3-4feb-bfea-653d2daa7515
@@ -56,6 +62,7 @@ table Product
 
 		annotation SummarizationSetBy = User
 
+	/// Top-level product classification (Bikes, Clothing, Accessories). Top level of the Products hierarchy.
 	column Category
 		dataType: string
 		lineageTag: 3286c978-313f-4827-a9e6-0c3014ef565f
@@ -66,6 +73,7 @@ table Product
 
 		annotation SummarizationSetBy = User
 
+	/// Hex color (or named color) used to format the background of cells/visual elements showing this product.
 	column 'Background Color Format'
 		dataType: string
 		displayFolder: Formatting
@@ -77,6 +85,7 @@ table Product
 
 		annotation SummarizationSetBy = User
 
+	/// Hex color (or named color) used to format the font of cells/visual elements showing this product.
 	column 'Font Color Format'
 		dataType: string
 		displayFolder: Formatting

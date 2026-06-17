@@ -1,7 +1,9 @@
+/// Reseller dimension. One row per reseller (customer) including business type and city/state/country location used for geographic analysis.
 table Reseller
 	lineageTag: c2a139cd-1b12-4bbd-aea4-c4f15ce4c1f8
 	sourceLineageTag: 8f18aec2-8698-42c2-a2d0-6e0ab97c60ed
 
+	/// Surrogate key joining Reseller to Sales. Hidden from report consumers.
 	column ResellerKey
 		dataType: int64
 		isHidden
@@ -15,6 +17,7 @@ table Reseller
 
 		annotation SummarizationSetBy = User
 
+	/// Reseller channel type (Specialty Bike Shop, Value Added Reseller, Warehouse).
 	column 'Business Type'
 		dataType: string
 		lineageTag: 3f45b77c-c2c3-4d5d-a113-1ec50456f864
@@ -25,6 +28,7 @@ table Reseller
 
 		annotation SummarizationSetBy = User
 
+	/// Reseller display name shown in visuals.
 	column Reseller
 		dataType: string
 		lineageTag: 88a9bf7f-dce8-4310-8050-bb33e38e98f7
@@ -35,6 +39,7 @@ table Reseller
 
 		annotation SummarizationSetBy = User
 
+	/// Reseller city. Tagged as geographic data for map visuals.
 	column City
 		dataType: string
 		lineageTag: 5beb4af8-87c8-4a28-92b0-2235e5281ad0
@@ -45,7 +50,8 @@ table Reseller
 
 		annotation SummarizationSetBy = User
 
-	column State-Province
+	/// Reseller state or province. Tagged as state/province for map visuals.
+	column State
 		dataType: string
 		lineageTag: e4e2845b-fa7b-4392-9033-4617e05e2885
 		sourceLineageTag: 987ad92b-87ef-4c9a-87aa-7cd7c9a3036b
@@ -55,7 +61,8 @@ table Reseller
 
 		annotation SummarizationSetBy = User
 
-	column Country-Region
+	/// Reseller country. Tagged as country for map visuals.
+	column Country
 		dataType: string
 		lineageTag: b899d878-0a4d-4a62-ab8e-e0f3be2c150e
 		sourceLineageTag: aa6ac85c-86e5-4f58-b75a-8376c0c8ac42
@@ -86,12 +93,12 @@ table Reseller
 		level Country-Region
 			lineageTag: 25093cd0-c26c-4718-9076-1191a3b678c6
 			sourceLineageTag: 2caa75c9-b1ee-4e4f-be2b-112f07f20a51
-			column: Country-Region
+			column: Country
 
 		level State-Province
 			lineageTag: bfb38488-fd0d-44b5-8152-3d9b15710eae
 			sourceLineageTag: 6e0b034e-4310-4f2f-8d4a-a544c023a742
-			column: State-Province
+			column: State
 
 		level City
 			lineageTag: 6fbb1fa5-59f3-4947-ba37-37108708eb54

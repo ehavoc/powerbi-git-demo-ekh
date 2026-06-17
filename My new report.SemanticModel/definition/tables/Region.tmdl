@@ -1,7 +1,9 @@
+/// Sales-territory dimension. One row per territory with its country and broader regional group, used to slice and group Sales by geography.
 table Region
 	lineageTag: 5c50f373-18ee-422e-a7bd-73f136039a4c
 	sourceLineageTag: 5f6774b0-7a2d-4c98-a680-f126af8c7e5c
 
+	/// Surrogate key joining Region to Sales and SalespersonRegion. Hidden from report consumers.
 	column SalesTerritoryKey
 		dataType: int64
 		isHidden
@@ -15,6 +17,7 @@ table Region
 
 		annotation SummarizationSetBy = User
 
+	/// Sales territory name (e.g. Northwest, France). Bottom level of the Regions hierarchy.
 	column Region
 		dataType: string
 		lineageTag: ca3771e5-0941-409c-bc7e-fad1332c1d2a
@@ -25,6 +28,7 @@ table Region
 
 		annotation SummarizationSetBy = User
 
+	/// Country the territory belongs to. Tagged as geographic data for map visuals.
 	column Country
 		dataType: string
 		lineageTag: f6215352-f396-43de-a0be-43247f8762dc
@@ -35,6 +39,7 @@ table Region
 
 		annotation SummarizationSetBy = User
 
+	/// Broad regional grouping (North America, Europe, Pacific). Top level of the Regions hierarchy.
 	column Group
 		dataType: string
 		lineageTag: 8b6d741b-ce92-4192-ae90-5c8456f7435c

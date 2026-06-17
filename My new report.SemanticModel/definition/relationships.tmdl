@@ -38,6 +38,6 @@ relationship 02974c53-d8f2-4e5f-b347-99ac5b397c8e
 relationship 6a91166b-918d-a33f-650e-603ea1c2f839
 	crossFilteringBehavior: bothDirections
 	securityFilteringBehavior: none
-	fromColumn: Reseller.State-Province
+	fromColumn: Reseller.State
 	toColumn: 'US Population'.State
 

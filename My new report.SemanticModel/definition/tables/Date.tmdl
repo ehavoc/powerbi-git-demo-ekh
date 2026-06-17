@@ -1,7 +1,9 @@
+/// Date dimension at month grain. Contains one row per calendar month between Jan 2022 and Dec 2023 and provides Year/Quarter/Month attributes used for time-intelligence calculations and slicing.
 table Date
 	lineageTag: 27075cd3-09df-4a11-a0eb-17cf5d3be72d
 	sourceLineageTag: b11a86cf-d92e-4f86-bce2-8906a4823d37
 
+	/// First day of the calendar month. The grain of this table.
 	column Date
 		dataType: dateTime
 		isNullable: false
@@ -14,6 +16,7 @@ table Date
 
 		annotation SummarizationSetBy = User
 
+	/// Calendar year label in 'CYyyyy' format (e.g. CY2023). Top level of the Fiscal hierarchy.
 	column Year
 		dataType: string
 		lineageTag: 745c9eb8-c647-4ec3-9307-e29d997bd0b6
@@ -24,6 +27,7 @@ table Date
 
 		annotation SummarizationSetBy = User
 
+	/// Calendar quarter label (Qtr1-Qtr4).
 	column Quarter
 		dataType: string
 		lineageTag: 5e6fd4d0-6c48-4be2-a6e0-d889d86e21ce
@@ -34,6 +38,7 @@ table Date
 
 		annotation SummarizationSetBy = User
 
+	/// Full month name (January, February, ...). Sorted by MonthKey so months appear in calendar order, not alphabetically.
 	column Month
 		dataType: string
 		lineageTag: 17b01266-9fab-4709-bedd-71956fceee54
@@ -45,6 +50,7 @@ table Date
 
 		annotation SummarizationSetBy = User
 
+	/// Year+month integer in yyyymm form (e.g. 202307). Used as the sort key for the Month column.
 	column MonthKey
 		dataType: int64
 		formatString: 0
