@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Lakehouse",
+    "displayName": "lh_emihal_fabric_learning"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "fc9b9e0c-3f09-8801-4681-87a1ef213cbe"
+  }
+}
